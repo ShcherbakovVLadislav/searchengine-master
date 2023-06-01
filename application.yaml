@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url:
+      jdbc:mysql://localhost:3306/search_engine
+    username: root
+    password: qweasdzxc12345
+  jpa:
+    hibernate.ddl-auto: create
+    generate-ddl: true
+    show-sql: false
+
+
+indexing-settings:
+  sites:
+#    - url: https://lenta.ru
+#      name: Лента.ру
+#    - url: https://ipfran.ru/
+#      name: niko
+    - url: https://volochek.life/
+      name: VolochekLive
+    - url: https://skillbox.ru
+      name: Skillbox
+
+
+connection-settings:
+  userAgent: Mozilla/5.0 (X11; Fedora;Linux x86; rv:60.0) Gecko/20100101 Firefox/60.0
+  referer: https://www.google.com
