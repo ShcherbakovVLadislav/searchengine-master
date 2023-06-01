@@ -19,7 +19,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@Slf4j
 @AllArgsConstructor
 public class SiteCrawler extends RecursiveAction {
     private final SiteRepository siteRepository;
