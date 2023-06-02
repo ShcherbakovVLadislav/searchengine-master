@@ -13,7 +13,10 @@ import searchengine.model.SiteStatusType;
 import searchengine.repository.PageRepository;
 import searchengine.repository.SiteRepository;
 import searchengine.services.ApiService;
+import searchengine.services.IndexService;
+import searchengine.services.LemmaService;
 
+import javax.persistence.Index;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +33,8 @@ public class ApiServiceImpl implements ApiService {
     private final Set<SiteTable> sitesPageTablesFromDB;
     private final Connection connection;
     private AtomicBoolean indexingProcessing;
+    private final LemmaService lemmaService;
+    private final IndexService indexService;
 
 
 
@@ -80,7 +85,7 @@ public class ApiServiceImpl implements ApiService {
                 ConcurrentHashMap<String, SitesPageTable> resultForkJoinPageIndexer = new ConcurrentHashMap<>();
                 try {
                     System.out.println("Запущена индексация "+siteDomain.getUrl());
-                    new ForkJoinPool().invoke(new SiteCrawler(siteRepository,pageRepository,siteDomain, "", resultForkJoinPageIndexer, connection, indexingProcessing));
+                    new ForkJoinPool().invoke(new SiteCrawler(siteRepository, pageRepository, siteDomain, "", resultForkJoinPageIndexer, connection, indexingProcessing, lemmaService, indexService));
                 } catch (SecurityException ex) {
                     SiteTable siteTable = siteRepository.findById(siteDomain.getId()).orElseThrow();
                     siteTable.setSiteStatusType(SiteStatusType.FAILED);

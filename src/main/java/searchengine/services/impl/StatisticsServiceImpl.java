@@ -2,14 +2,21 @@ package searchengine.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import searchengine.config.Connection;
 import searchengine.config.Site;
 import searchengine.config.SitesList;
 import searchengine.dto.statistics.DetailedStatisticsItem;
 import searchengine.dto.statistics.StatisticsData;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.dto.statistics.TotalStatistics;
+import searchengine.model.SiteTable;
+import searchengine.repository.LemmaRepository;
+import searchengine.repository.PageRepository;
+import searchengine.repository.SiteRepository;
+import searchengine.services.LemmaService;
 import searchengine.services.StatisticsService;
 
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -19,21 +26,17 @@ import java.util.Random;
 public class StatisticsServiceImpl implements StatisticsService {
     private final SitesList sites;
     Random random = new Random();
+    private final PageRepository pageRepository;
+    private final LemmaRepository lemmaRepository;
+
     @Override
     public StatisticsResponse getStatistics() {
-
-
-
-
-
-
         String[] statuses = { "INDEXED", "FAILED", "INDEXING" };
         String[] errors = {
                 "Ошибка индексации: главная страница сайта не доступна",
                 "Ошибка индексации: сайт не доступен",
                 ""
         };
-
         TotalStatistics total = new TotalStatistics();
         total.setSites(sites.getSites().size());
         total.setIndexing(true);
@@ -45,8 +48,8 @@ public class StatisticsServiceImpl implements StatisticsService {
             DetailedStatisticsItem item = new DetailedStatisticsItem();
             item.setName(site.getName());
             item.setUrl(site.getUrl().toString());
-            int pages = random.nextInt(1_000);
-            int lemmas = pages * random.nextInt(1_000);
+            int pages = (int) pageRepository.count();
+            int lemmas = (int) lemmaRepository.count();
             item.setPages(pages);
             item.setLemmas(lemmas);
             item.setStatus(statuses[i % 3]);

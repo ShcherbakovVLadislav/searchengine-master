@@ -10,6 +10,8 @@ import searchengine.model.SitesPageTable;
 import searchengine.model.SiteTable;
 import searchengine.repository.PageRepository;
 import searchengine.repository.SiteRepository;
+import searchengine.services.IndexService;
+import searchengine.services.LemmaService;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -28,8 +30,19 @@ public class SiteCrawler extends RecursiveAction {
     private final String page;
     private final SiteTable siteDomain;
     private final ConcurrentHashMap<String, SitesPageTable> resultForkJoinPoolIndexedPages;
+    private final LemmaService lemmaService;
+    private final IndexService indexService;
 
-    public SiteCrawler(SiteRepository siteRepository, PageRepository pageRepository, SiteTable siteDomain, String page, ConcurrentHashMap<String, SitesPageTable> resultForkJoinPoolIndexedPages, Connection connection, AtomicBoolean indexingProcessing) {
+
+    public SiteCrawler(SiteRepository siteRepository,
+                       PageRepository pageRepository,
+                       SiteTable siteDomain,
+                       String page,
+                       ConcurrentHashMap<String, SitesPageTable> resultForkJoinPoolIndexedPages,
+                       Connection connection,
+                       AtomicBoolean indexingProcessing,
+                       LemmaService lemmaService,
+                       IndexService indexService) {
         this.siteRepository = siteRepository;
         this.pageRepository = pageRepository;
         this.page = page;
@@ -37,6 +50,8 @@ public class SiteCrawler extends RecursiveAction {
         this.connection = connection;
         this.indexingProcessing = indexingProcessing;
         this.siteDomain = siteDomain;
+        this.lemmaService = lemmaService;
+        this.indexService = indexService;
     }
 
     @SneakyThrows
@@ -96,10 +111,11 @@ public class SiteCrawler extends RecursiveAction {
         siteTable.setStatusTime(Timestamp.valueOf(LocalDateTime.now()));
         siteRepository.save(siteTable);
         pageRepository.save(indexingSitesPageTable);
+        indexService.indexHtml(indexingSitesPageTable.getContent(), indexingSitesPageTable);
         List<SiteCrawler> indexingPagesTasks = new ArrayList<>();
         for (String url : urlSet) {
             if (resultForkJoinPoolIndexedPages.get(url) == null && indexingProcessing.get()) {
-                SiteCrawler task = new SiteCrawler(siteRepository, pageRepository, siteTable, url, resultForkJoinPoolIndexedPages, connection, indexingProcessing);
+                SiteCrawler task = new SiteCrawler(siteRepository, pageRepository, siteTable, url, resultForkJoinPoolIndexedPages, connection, indexingProcessing, lemmaService, indexService);
                 task.fork();
                 indexingPagesTasks.add(task);
             }

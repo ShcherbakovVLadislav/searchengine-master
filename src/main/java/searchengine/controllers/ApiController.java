@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 import searchengine.config.SitesList;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.services.ApiService;
+import searchengine.services.LemmaService;
 import searchengine.services.StatisticsService;
+import searchengine.services.impl.LemmaServiceImpl;
 
 import java.io.IOException;
 import java.net.URL;
@@ -25,6 +27,7 @@ public class ApiController {
     private final ApiService apiService;
     private final AtomicBoolean indexingProcessing = new AtomicBoolean(false);
     private final SitesList sitesList;
+    private final LemmaService lemmaService;
 
     @GetMapping("/statistics")
     public ResponseEntity<StatisticsResponse> statistics() {
@@ -56,7 +59,6 @@ public class ApiController {
 
     @GetMapping("/indexPage")
     public ResponseEntity indexPage(@RequestParam URL url) throws IOException {
-
         try {
             sitesList.getSites().stream().filter(site -> url.getHost().equals(site.getUrl().getHost())).findFirst().orElseThrow();
         } catch (RuntimeException ex) {
@@ -64,6 +66,7 @@ public class ApiController {
                     "error: Данная страница находится за пределами сайтов " +
                     "указанных в конфигурационном файле");
         }
+        lemmaService.getLemmasFromUrl(url);
         return ResponseEntity.status(HttpStatus.OK).body("result: true");
     }
 }
