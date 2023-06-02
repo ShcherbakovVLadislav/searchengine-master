@@ -25,7 +25,7 @@ public class SitesPageTable {
     @NotNull
     private int code;
     @NotNull
-    @Column(columnDefinition = "MEDIUMTEXT")
+    @Column(columnDefinition = "MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String content;
     @ManyToOne
     @JoinColumn(name = "site_id",nullable = false,insertable = false,updatable = false)
