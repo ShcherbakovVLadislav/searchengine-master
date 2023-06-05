@@ -81,7 +81,7 @@ public record SearchService(LemmaEngine lemmaEngine, LemmaRepository lemmaReposi
             if (content.lastIndexOf(" ", start) != -1) {
                 startIndex = content.lastIndexOf(" ", start);
             } else startIndex = start;
-            if (content.indexOf(" ", (end + lemmaIndex.size() / (lemmaIndex.size() / 10))) != -1) {
+            if (content.indexOf(" ", end + lemmaIndex.size() / 10) != -1) {
                 nextIndex = content.indexOf(" ", end + lemmaIndex.size() / 10);
             } else nextIndex = content.indexOf(" ", end);
             String text = content.substring(startIndex, nextIndex).replaceAll(word, "<b>".concat(word).concat("</b>"));
