@@ -53,8 +53,8 @@ public class StatisticsServiceImpl implements StatisticsService {
             int lemmas = (int) lemmaRepository.count();
             item.setPages(pages);
             item.setLemmas(lemmas);
-            item.setStatus(statuses[i % 3]);
-            item.setError(errors[i % 3]);
+            item.setStatus(siteRepository.findSiteStatusType(i));
+            item.setError(siteRepository.findLastError(i));
             item.setStatusTime(System.currentTimeMillis() -
                     (random.nextInt(10_000)));
             total.setPages(total.getPages() + pages);

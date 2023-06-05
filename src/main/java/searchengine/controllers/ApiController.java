@@ -69,12 +69,12 @@ public class ApiController {
         try {
             sitesList.getSites().stream().filter(site -> url.getHost().equals(site.getUrl().getHost())).findFirst().orElseThrow();
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("result: false " +
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("'result': false " +
                     "error: Данная страница находится за пределами сайтов " +
                     "указанных в конфигурационном файле");
         }
         lemmaService.getLemmasFromUrl(url);
-        return ResponseEntity.status(HttpStatus.OK).body("result: true");
+        return ResponseEntity.status(HttpStatus.OK).body("'result': true");
     }
 
     @GetMapping("/search")
