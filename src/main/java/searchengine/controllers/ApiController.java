@@ -41,40 +41,37 @@ public class ApiController {
         return ResponseEntity.ok(statisticsService.getStatistics());
     }
     @GetMapping("/startIndexing")
-    public ResponseEntity startIndexing() {
+    public ResultDto startIndexing() {
         if(indexingProcessing.get()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("'result' : false, " +
-                    "'error' : Индексация уже запущена");
+            return new ResultDto(false, "Индексация уже идёт.", HttpStatus.CONFLICT);
         } else {
             indexingProcessing.set(true);
             Runnable start = () -> apiService.startIndexing(indexingProcessing);
             new Thread(start).start();
-            return ResponseEntity.status(HttpStatus.OK).body("'result' : true");
+            return new ResultDto(true, HttpStatus.OK);
         }
     }
 
     @GetMapping("/stopIndexing")
-    public ResponseEntity stopIndexing() {
+    public ResultDto stopIndexing() {
         if (!indexingProcessing.get()) {
-            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body("'result' : false, " +
-                    "'error' : Индексация не запущена");
+            return new ResultDto(false,"Индексация не запущена." , HttpStatus.METHOD_NOT_ALLOWED);
         } else {
             indexingProcessing.set(false);
-            return ResponseEntity.status(HttpStatus.OK).body("'result' : true ");
+            return new ResultDto(true, HttpStatus.OK);
         }
     }
 
     @GetMapping("/indexPage")
-    public ResponseEntity indexPage(@RequestParam URL url) throws IOException {
+    public ResultDto indexPage(@RequestParam URL url) throws IOException {
         try {
             sitesList.getSites().stream().filter(site -> url.getHost().equals(site.getUrl().getHost())).findFirst().orElseThrow();
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("'result': false " +
-                    "error: Данная страница находится за пределами сайтов " +
-                    "указанных в конфигурационном файле");
+            return new ResultDto(false, "Данная страница находится за пределами сайтов, " +
+                    "указанных в конфигурационном файле.", HttpStatus.BAD_REQUEST);
         }
         lemmaService.getLemmasFromUrl(url);
-        return ResponseEntity.status(HttpStatus.OK).body("'result': true");
+        return new ResultDto(true, HttpStatus.OK);
     }
 
     @GetMapping("/search")
