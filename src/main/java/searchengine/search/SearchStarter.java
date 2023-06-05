@@ -39,7 +39,7 @@ public record SearchStarter(SiteRepository siteRepository, SearchService searchS
         for (Lemma l : foundLemmaList) {
             if (l.getLemma().equals(text)) {
                 searchData = (searchService.createSearchDtoList(foundLemmaList, textLemmaList, start, limit));
-                searchData.sort((o1, o2) -> Float.compare(o2.relevance(), o1.relevance()));
+                searchData.sort((o1, o2) -> Float.compare(o2.getRelevance(), o1.getRelevance()));
                 if (searchData.size() > limit) {
                     for (var y = start; y < limit; y++) {
                         result.add(searchData.get(y));
