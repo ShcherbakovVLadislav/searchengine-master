@@ -1,34 +1,67 @@
 package searchengine.lemma;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.lucene.morphology.LuceneMorphology;
+import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 import searchengine.config.LemmaConfiguration;
-import searchengine.exception.CurrentRuntimeException;
+import searchengine.services.LemmaService;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 
 @Component
 @Slf4j
-public record LemmaEngine(LemmaConfiguration lemmaConfiguration) {
-    public Map<String, Integer> getLemmaMap(String text) {
-        text = arrayContainsWords(text);
-        Map<String, Integer> lemmaList = new HashMap<>();
-        String[] elements = text.toLowerCase(Locale.ROOT).split("\\s+");
-        List<String> wordsList;
-        int count;
-        for (String el : elements) {
-            try {
-                wordsList = getLemma(el);
-            } catch (Exception e) {
-                throw new CurrentRuntimeException(e.getMessage());
-            }
-            for (String word : wordsList) {
-                count = lemmaList.getOrDefault(word, 0);
-                lemmaList.put(word, count + 1);
-            }
+@RequiredArgsConstructor
+public class LemmaEngine implements LemmaService {
+
+    private final LemmaConfiguration lemmaConfiguration;
+
+    @Override
+    public HashMap<String, Integer> getLemmasFromText(String html) throws IOException {
+        HashMap<String, Integer> lemmasInText = new HashMap<>();
+        LuceneMorphology luceneMorphology = new RussianLuceneMorphology();
+        String text = Jsoup.parse(html).text();
+        List<String> words = new ArrayList<>(List.of(text.replaceAll("(?U)\\pP","")
+                .toLowerCase().split(" ")));
+        for (String word : words) {
+            findingLemma(word, luceneMorphology, lemmasInText);
         }
-        return lemmaList;
+        return lemmasInText;
+    }
+
+    private void findingLemma(String word, LuceneMorphology luceneMorphology, HashMap<String, Integer> lemmas) {
+        try {
+            if (word.isEmpty() || String.valueOf(word.charAt(0)).matches("[0-9]") || String.valueOf(word.charAt(0)).matches("[A-Za-z]")) {
+                return;
+            }
+            List<String> initialForms = luceneMorphology.getNormalForms(word);
+            String wordInfo = luceneMorphology.getMorphInfo(word).toString();
+            if (!wordInfo.contains("СОЮЗ") && !wordInfo.contains("ПРЕДЛ") && !wordInfo.contains("МЕЖД")) {
+                for (String initialWord : initialForms) {
+                    if (!lemmas.containsKey(initialWord)) {
+                        lemmas.put(initialWord, 1);
+                    } else {
+                        lemmas.replace(initialWord, lemmas.get(initialWord) + 1);
+                    }
+                }
+            }
+        } catch (RuntimeException e) {
+            log.debug(e.getMessage());
+        }
+    }
+
+    @Override
+    public void getLemmasFromUrl(URL url) throws IOException {
+        org.jsoup.Connection connection = Jsoup.connect(String.valueOf(url));
+        Document document = connection.timeout(60000).get();
+        HashMap<String,Integer> result = getLemmasFromText(document.body().html());
+        System.out.println(result.keySet());
+        System.out.println(result.values());
     }
 
     public List<String> getLemma(String word) throws IOException {
@@ -39,7 +72,6 @@ public record LemmaEngine(LemmaConfiguration lemmaConfiguration) {
                 lemmaList.addAll(baseRusForm);
             }
         }
-
         return lemmaList;
     }
 

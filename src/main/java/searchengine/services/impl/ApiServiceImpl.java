@@ -1,8 +1,6 @@
 package searchengine.services.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import searchengine.config.Connection;
 import searchengine.config.Site;
@@ -16,7 +14,6 @@ import searchengine.services.ApiService;
 import searchengine.services.IndexService;
 import searchengine.services.LemmaService;
 
-import javax.persistence.Index;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
