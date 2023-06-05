@@ -14,8 +14,8 @@ indexing-settings:
   sites:
     - url: https://lenta.ru
       name: Лента.ру
-#    - url: https://ipfran.ru/
-#      name: niko
+    - url: https://ipfran.ru/
+      name: niko
     - url: https://volochek.life/
       name: VolochekLive
     - url: https://skillbox.ru

@@ -28,6 +28,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     Random random = new Random();
     private final PageRepository pageRepository;
     private final LemmaRepository lemmaRepository;
+    private final SiteRepository siteRepository;
 
     @Override
     public StatisticsResponse getStatistics() {
@@ -69,5 +70,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         response.setResult(true);
         return response;
     }
+
+
 
 }
