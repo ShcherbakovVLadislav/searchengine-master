@@ -29,4 +29,7 @@ public class SearchIndex {
     @ManyToOne
     @JoinColumn(name = "lemma_id",insertable = false,updatable = false,nullable = false)
     private Lemma lemma;
+
+    @Column(nullable = false, name = "index_rank")
+    private float rank;
 }

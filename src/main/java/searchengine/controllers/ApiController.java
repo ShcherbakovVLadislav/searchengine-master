@@ -8,14 +8,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import searchengine.config.SitesList;
+import searchengine.dto.SearchDto;
+import searchengine.dto.response.ResultDto;
 import searchengine.dto.statistics.StatisticsResponse;
+import searchengine.repository.SiteRepository;
+import searchengine.search.SearchStarter;
 import searchengine.services.ApiService;
 import searchengine.services.LemmaService;
 import searchengine.services.StatisticsService;
-import searchengine.services.impl.LemmaServiceImpl;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @RestController
@@ -28,6 +32,9 @@ public class ApiController {
     private final AtomicBoolean indexingProcessing = new AtomicBoolean(false);
     private final SitesList sitesList;
     private final LemmaService lemmaService;
+    private final SiteRepository siteRepository;
+
+    private final SearchStarter searchStarter;
 
     @GetMapping("/statistics")
     public ResponseEntity<StatisticsResponse> statistics() {
@@ -68,5 +75,23 @@ public class ApiController {
         }
         lemmaService.getLemmasFromUrl(url);
         return ResponseEntity.status(HttpStatus.OK).body("result: true");
+    }
+
+    @GetMapping("/search")
+    public ResultDto search(@RequestParam(name = "query", required = false, defaultValue = "") String query,
+                            @RequestParam(name = "site", required = false, defaultValue = "") String site,
+                            @RequestParam(name = "offset", required = false, defaultValue = "0") int offset) {
+        List<SearchDto> searchData;
+        if (!site.isEmpty()) {
+            if (siteRepository.findByUrl(site) == null) {
+                return new ResultDto(false, "Данная страница находится за пределами сайтов,\n" +
+                        "указанных в конфигурационном файле", HttpStatus.BAD_REQUEST);
+            } else {
+                searchData = searchStarter.getSearchFromOneSite(query, site, offset, 20);
+            }
+        } else {
+            searchData = searchStarter.getFullSearch(query, offset, 20);
+        }
+        return new ResultDto(true, searchData.size(), searchData, HttpStatus.OK);
     }
 }
