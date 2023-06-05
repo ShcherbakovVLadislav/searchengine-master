@@ -17,7 +17,7 @@ indexing-settings:
     - url: https://skillbox.ru
       name: Skillbox
     - url: https://www.lutherancathedral.ru/
-      name: Кафедра
+      name: Собор Петра и Павла
 
 
 connection-settings:

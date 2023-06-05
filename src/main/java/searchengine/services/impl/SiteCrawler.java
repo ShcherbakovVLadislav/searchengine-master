@@ -126,7 +126,5 @@ public class SiteCrawler extends RecursiveAction {
             }
             page.join();
         }
-
     }
-
 }

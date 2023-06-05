@@ -16,7 +16,6 @@ import searchengine.model.SiteTable;
 import searchengine.repository.IndexRepository;
 import searchengine.repository.LemmaRepository;
 import searchengine.repository.PageRepository;
-import searchengine.services.LemmaService;
 
 import java.io.IOException;
 import java.util.*;
